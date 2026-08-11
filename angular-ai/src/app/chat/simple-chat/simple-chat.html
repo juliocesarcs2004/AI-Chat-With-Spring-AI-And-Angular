@@ -8,7 +8,7 @@
     <div class="message">
       @for (message of messages(); track message) {
         <div class="message">
-          <div class="message-buble">
+          <div class="message-buble" [ngClass]="{'user': !message.isBot}">
             {{ message.text }}
           </div>
         </div>>
@@ -19,8 +19,8 @@
   <div class="chat-input">
     <mat-form-field class="full-width">
       <mat-label>Ask anything</mat-label>
-      <input matInput>
-      <button matSuffix matIconButton aria-label="Send">
+      <input matInput [(ngModel)]="userInput" (keyup.enter)="sendMessage()">
+      <button matSuffix matIconButton aria-label="Send" (click)="sendMessage()">
         <mat-icon>send</mat-icon>
       </button>
     </mat-form-field>
