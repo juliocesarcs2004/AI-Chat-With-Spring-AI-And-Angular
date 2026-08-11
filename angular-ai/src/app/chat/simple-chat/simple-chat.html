@@ -4,5 +4,26 @@
       <span>Simple Chat</span>
     </mat-toolbar>
   </div>
+  <div class="chat-history">
+    <div class="message">
+      @for (message of messages(); track message) {
+        <div class="message">
+          <div class="message-buble">
+            {{ message.text }}
+          </div>
+        </div>>
+      }
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <mat-form-field class="full-width">
+      <mat-label>Ask anything</mat-label>
+      <input matInput>
+      <button matSuffix matIconButton aria-label="Send">
+        <mat-icon>send</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
 </mat-card>
 
