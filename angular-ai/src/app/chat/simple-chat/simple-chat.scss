@@ -36,6 +36,18 @@
   padding: 8px;
 }
 
+.typing {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 1s steps(3, end) infinite alternate;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
 .chat-input {
   flex: 0 0 auto;
   padding: 16px;
