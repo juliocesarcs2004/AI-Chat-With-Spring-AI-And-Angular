@@ -3,6 +3,7 @@ package com.juliocesarcs2004.api_ai.memory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,8 @@ public class MemoryChatService {
                         MessageChatMemoryAdvisor.builder(chatMemory).build()
                 )
                 .build();
+
+        MessageWindowChatMemory a;
     }
 
     public String simpleChat(String message) {
