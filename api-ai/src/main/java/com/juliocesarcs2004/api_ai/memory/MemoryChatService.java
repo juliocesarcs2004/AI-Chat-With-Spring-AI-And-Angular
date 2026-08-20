@@ -48,15 +48,13 @@ public class MemoryChatService {
                 .content();
     }
 
-    record NewChatResponse(String chatId, String description) {}
+    record NewChatResponse(String chatId, String description, String response) {}
 
     public NewChatResponse createNewChat(String message) {
         String description = generateDescription(message);
-        // generate a new chat id
         String chatId = this.memoryChatRepository.generateChatId(USER_ID, description);
-        // prompt the chat client to create a new chat with the generated id
-
-        return new NewChatResponse(chatId, description);
+        String response = this.chat(message,chatId);
+        return new NewChatResponse(chatId, description, response);
     }
 
     private String generateDescription(String message) {
