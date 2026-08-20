@@ -8,6 +8,8 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class MemoryChatService {
@@ -48,8 +50,6 @@ public class MemoryChatService {
                 .content();
     }
 
-    record NewChatResponse(String chatId, String description, String response) {}
-
     public NewChatResponse createNewChat(String message) {
         String description = generateDescription(message);
         String chatId = this.memoryChatRepository.generateChatId(USER_ID, description);
@@ -62,6 +62,10 @@ public class MemoryChatService {
                 .user(DESCRIPTION_PROMPT + message)
                 .call()
                 .content();
+    }
+
+    public List<Chat> getAllChatsForUser() {
+        return this.memoryChatRepository.getAllChatsForUser(USER_ID);
     }
 
 }
