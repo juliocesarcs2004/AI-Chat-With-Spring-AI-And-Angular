@@ -68,4 +68,8 @@ public class MemoryChatService {
         return this.memoryChatRepository.getAllChatsForUser(USER_ID);
     }
 
+    public List<ChatMessage> getChatMessages(String chatId) {
+        return this.memoryChatRepository.getChatMessages(chatId);
+    }
+
 }

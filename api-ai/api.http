@@ -31,3 +31,8 @@ Content-Type: application/json
 
 GET localhost:8080/api/chat-memory
 Content-Type: application/json
+
+### chatid
+
+GET localhost:8080/api/chat-memory/4df70936-8b03-4ca3-b9ba-eb4c7147c3af
+Content-Type: application/json
