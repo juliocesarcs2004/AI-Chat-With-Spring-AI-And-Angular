@@ -16,9 +16,14 @@ public class MemoryChatController {
         this.chatService = chatService;
     }
 
-    @PostMapping
-    ChatMessage simpleChat(@RequestBody ChatMessage chatMessage) {
-        var response = this.chatService.simpleChat(chatMessage.message());
-        return new ChatMessage(response);
+//    @PostMapping
+//    ChatMessage simpleChat(@RequestBody ChatMessage chatMessage) {
+//        var response = this.chatService.chat(chatMessage.message());
+//        return new ChatMessage(response);
+//    }
+
+    @PostMapping("/start")
+    MemoryChatService.NewChatResponse startNewChat(@RequestBody ChatMessage chatMessage) {
+        return this.chatService.createNewChat(chatMessage.message());
     }
 }

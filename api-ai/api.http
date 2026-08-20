@@ -17,3 +17,12 @@ Content-Type: application/json
 {
   "message": "Conte uma piada sobre Java"
 }
+
+### chat with memory and conversation ID
+
+POST localhost:8080/api/chat-memory/start
+Content-Type: application/json
+
+{
+  "message": "Conte uma piada sobre Java"
+}
