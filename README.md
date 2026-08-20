@@ -1,166 +1,273 @@
-# AI Chat Application - Spring AI & Angular
+# AI Chat with Spring AI and Angular
 
 ![Angular](https://img.shields.io/badge/Angular-20.3-red)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-green)
 ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0.0-brightgreen)
 ![Java](https://img.shields.io/badge/Java-25-orange)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 
-## 📋 Descrição do Projeto
+## Visão Geral
 
-Aplicação de chat inteligente que integra inteligência artificial com Spring AI e interface moderna desenvolvida em Angular. A aplicação permite que usuários interajam com um modelo de linguagem (LLM) através de uma interface web responsiva e intuitiva.
+Este projeto é uma aplicação full-stack de chat com inteligência artificial, desenvolvida com Angular no frontend e Spring Boot + Spring AI no backend. A solução usa um modelo de linguagem da OpenAI para responder mensagens do usuário e inclui uma funcionalidade de chat com memória por conversa.
 
-Este projeto demonstra a integração completa entre um backend robusto baseado em Spring Boot com capacidades de IA e um frontend moderno em Angular, utilizando Material Design para uma experiência de usuário profissional.
+A estrutura foi pensada para demonstrar uma integração real entre:
 
-## ✨ Características Principais
+- frontend moderno em Angular + Angular Material;
+- backend REST em Java com Spring Boot;
+- acesso a IA via Spring AI;
+- persistência de conversas em banco PostgreSQL;
+- suporte a containerização com Docker Compose para o banco de dados.
 
-- 🤖 **Integração com IA**: Utiliza Spring AI com OpenAI como provedor de modelo de linguagem
-- 💬 **Chat em Tempo Real**: Interface de chat responsiva e intuitiva
-- 🎨 **Design Moderno**: Desenvolvido com Angular Material para uma UX profissional
-- 🔄 **Arquitetura Completa**: Full-stack com separação clara entre frontend e backend
-- 📱 **Responsivo**: Interface otimizada para desktop e dispositivos móveis
-- 🛡️ **Spring Boot**: Backend robusto e escalável
+## Objetivo do Projeto
 
-## 🏗️ Arquitetura do Sistema
+O objetivo principal é permitir que o usuário converse com um assistente virtual em uma interface simples e responsiva, com possibilidade de:
 
-```
-Cliente Angular (localhost:4200)
+- enviar mensagens em um chat intuitivo;
+- receber respostas geradas por um modelo de IA;
+- manter histórico de conversas por chat;
+- criar descrições automáticas para cada conversa;
+- aproveitar memória de contexto entre mensagens da mesma sessão.
 
-    Simple Chat Component
-    - Input de mensagens
-    - Exibição de histórico de chat
-    - Material Design Components
-
-                    ↓ HTTP Request (POST)
-
-                    /api/chat
-
-                    ↓
-
-Spring Boot API (localhost:8080)
-
-    ChatController
-    - Endpoint: POST /api/chat
-    - Processa mensagens do usuário
-
-                    ↓
-
-    Spring AI - ChatClient
-    - Comunicação com OpenAI API
-    - Processamento de LLM
-
-                    ↓
-
-                 API Call
-                    ↓
-
-OpenAI API
-
-    - Processamento de linguagem natural
-    - Geração de respostas inteligentes
-```
-
-## 🛠️ Tecnologias Utilizadas
+## Stack Tecnológica
 
 ### Backend
 
-- **Java 25**: Linguagem de programação principal
-- **Spring Boot 4.1.0**: Framework web
-- **Spring AI 2.0.0**: Integração com modelos de linguagem
-- **Spring AI OpenAI**: Provider de IA
-- **Maven**: Gerenciador de dependências e build
+- Java 25
+- Spring Boot 4.1.0
+- Spring AI 2.0.0
+- Spring AI OpenAI Starter
+- Spring JDBC Chat Memory Repository
+- PostgreSQL
+- Maven
 
 ### Frontend
 
-- **Angular 20.3.0**: Framework web moderno
-- **Angular Material 20.2.14**: Componentes de UI
-- **TypeScript 5.x**: Linguagem de programação tipada
-- **RxJS 7.8.0**: Programação reativa
-- **SCSS**: Pré-processador CSS
+- Angular 20.3
+- Angular Material
+- TypeScript 5.x
+- RxJS
+- SCSS
 
-### Infraestrutura
+### Infraestrutura e DevOps
 
-- **Node.js**: Runtime para Angular
-- **npm**: Gerenciador de pacotes JavaScript
+- Docker Compose
+- Maven Wrapper
+- npm
+- Node.js
 
-## 📋 Requisitos do Sistema
+## Arquitetura do Sistema
+
+O sistema está dividido em duas partes principais:
+
+1. Frontend Angular: interface web para conversa com o assistente.
+2. Backend Spring Boot: expõe endpoints REST para comunicação com o modelo de IA e armazenamento de memória.
+
+Fluxo principal:
+
+```text
+Usuário (Angular UI)
+        |
+        v
+POST /api/chat-memory/start ou /api/chat-memory/{chatId}
+        |
+        v
+Spring Boot API
+        |
+        +--> ChatClient do Spring AI
+        |
+        +--> MessageWindowChatMemory
+        |
+        +--> PostgreSQL (histórico de conversas)
+        |
+        v
+Resposta do modelo OpenAI
+```
+
+## Funcionalidades
+
+### 1. Chat simples
+
+A API básica de chat recebe uma mensagem e devolve a resposta do modelo sem armazenar contexto em memória.
+
+Endpoint:
+
+- POST /api/chat
+
+Implementação principal:
+
+- `api-ai/src/main/java/com/juliocesarcs2004/api_ai/chat/ChatController.java`
+
+### 2. Chat com memória de conversa
+
+Esse fluxo é o mais completo do projeto. Ele usa `MessageWindowChatMemory` e `JdbcChatMemoryRepository` para manter contexto de uma conversa e controlar vários chats por usuário.
+
+Endpoints:
+
+- POST /api/chat-memory/start
+- POST /api/chat-memory/{chatId}
+- GET /api/chat-memory
+- GET /api/chat-memory/{chatId}
+
+Implementações principais:
+
+- `api-ai/src/main/java/com/juliocesarcs2004/api_ai/memory/MemoryChatController.java`
+- `api-ai/src/main/java/com/juliocesarcs2004/api_ai/memory/MemoryChatService.java`
+- `api-ai/src/main/java/com/juliocesarcs2004/api_ai/memory/MemoryChatRepository.java`
+
+### 3. Geração automática de descrição da conversa
+
+Quando um novo chat é criado, a aplicação envia a primeira mensagem para um cliente de IA e gera um resumo curto (até 30 caracteres) para representar a conversa.
+
+Essa lógica está em:
+
+- `MemoryChatService.generateDescription()`
+
+### 4. Banco de memória de conversas
+
+As tabelas de suporte para a memória do Spring AI são definidas em:
+
+- `api-ai/src/main/resources/schema-postgresql.sql`
+
+Estrutura principal:
+
+- `SPRING_AI_CHAT_MEMORY`: armazena as mensagens da conversa com `conversation_id`, `content`, `type` e `timestamp`.
+- `CHAT_MEMORY`: armazena metadados do chat, como `conversation_id`, `user_id` e `description`.
+
+## Estrutura do Projeto
+
+```text
+AI-Chat-With-Spring-AI-And-Angular/
+├── README.md
+├── angular-ai/
+│   ├── angular.json
+│   ├── package.json
+│   ├── proxy.conf.js
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.spec.json
+│   ├── public/
+│   └── src/
+│       ├── app/
+│       │   ├── app.config.ts
+│       │   ├── app.html
+│       │   ├── app.routes.ts
+│       │   ├── app.scss
+│       │   ├── app.spec.ts
+│       │   ├── app.ts
+│       │   └── chat/
+│       │       ├── chat-response.ts
+│       │       ├── chat-service.ts
+│       │       └── simple-chat/
+│       │           ├── simple-chat.html
+│       │           ├── simple-chat.scss
+│       │           └── simple-chat.ts
+│       ├── index.html
+│       ├── main.ts
+│       └── styles.scss
+├── api-ai/
+│   ├── compose.yaml
+│   ├── mvnw
+│   ├── mvnw.cmd
+│   ├── pom.xml
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/juliocesarcs2004/api_ai/
+│   │   │   │       ├── ApiAiApplication.java
+│   │   │   │       ├── chat/
+│   │   │   │       │   ├── ChatController.java
+│   │   │   │       │   └── ChatMessage.java
+│   │   │   │       └── memory/
+│   │   │   │           ├── Chat.java
+│   │   │   │           ├── ChatMessage.java
+│   │   │   │           ├── MemoryChatController.java
+│   │   │   │           ├── MemoryChatRepository.java
+│   │   │   │           ├── MemoryChatService.java
+│   │   │   │           └── NewChatResponse.java
+│   │   │   └── resources/
+│   │   │       ├── application.properties
+│   │   │       ├── schema-mysql.sql
+│   │   │       └── schema-postgresql.sql
+│   │   └── test/
+│   │       └── java/com/juliocesarcs2004/api_ai/ApiAiApplicationTests.java
+│   └── target/
+└── .gitignore
+```
+
+## Configuração do Backend
 
 ### Pré-requisitos
 
-- **Java 25** ou superior
-- **Node.js 18.x** ou superior
-- **npm 9.x** ou superior
-- **Maven 3.8+**
-- **Chave de API do OpenAI** (para usar Spring AI)
+- Java 25
+- Maven 3.8+
+- PostgreSQL em execução local ou via Docker
+- Chave da OpenAI em variável de ambiente
 
-### Verificar Versões Instaladas
+### Variáveis de ambiente
 
-```bash
-# Verificar Java
-java -version
-
-# Verificar Node.js e npm
-node --version
-npm --version
-
-# Verificar Maven
-mvn --version
-```
-
-## 🚀 Instalação
-
-### 1. Clonar o Repositório
-
-```bash
-git clone <url-do-repositorio>
-cd AI-Chat-With-Spring-AI-And-Angular
-```
-
-### 2. Configuração do Backend (Spring Boot)
-
-```bash
-# Navegar para o diretório do backend
-cd api-ai
-
-# Instalação de dependências (automática com Maven)
-# Nenhuma configuração adicional necessária se apenas usar Maven
-
-# Para Windows
-mvnw clean install
-
-# Para macOS/Linux
-./mvnw clean install
-```
-
-### 3. Configuração do Frontend (Angular)
-
-```bash
-# Navegar para o diretório do frontend (em outro terminal)
-cd angular-ai
-
-# Instalação de dependências
-npm install
-```
-
-### 4. Configurar Variáveis de Ambiente
-
-#### Backend - api-ai/src/main/resources/application.properties
+No arquivo `api-ai/src/main/resources/application.properties`, a chave da API da OpenAI está configurada assim:
 
 ```properties
-# OpenAI Configuration
-spring.ai.openai.api-key=<sua-chave-api-openai>
-spring.ai.openai.chat.options.model=gpt-4
-spring.ai.openai.chat.options.temperature=0.7
-
-# Server Configuration
-server.port=8080
-server.servlet.context-path=/api
+spring.application.name=api-ai
+spring.ai.openai.api-key=${OPENAI_API_KEY}
 ```
 
-#### Frontend - angular-ai/proxy.conf.js
+É necessário exportar a variável antes de rodar a aplicação:
+
+```bash
+export OPENAI_API_KEY=sua_chave_da_openai
+```
+
+No macOS/Linux, também pode ser usado:
+
+```bash
+echo "export OPENAI_API_KEY=sua_chave_da_openai" >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Banco de dados
+
+O projeto já está configurado para usar PostgreSQL. O arquivo `compose.yaml` cria um container com PostgreSQL:
+
+```yaml
+services:
+  postgres:
+    image: "postgres:latest"
+    environment:
+      - "POSTGRES_DB=mydatabase"
+      - "POSTGRES_PASSWORD=secret"
+      - "POSTGRES_USER=myuser"
+    ports:
+      - "5432"
+```
+
+Configuração de conexão no `application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
+spring.datasource.username=myuser
+spring.datasource.password=secret
+spring.datasource.driver-class-name=org.postgresql.Driver
+```
+
+### Banco da memória de chat
+
+A aplicação usa o Spring AI JDBC chat memory repository. A criação das tabelas pode ser feita manualmente ou por script SQL, conforme o arquivo:
+
+- `api-ai/src/main/resources/schema-postgresql.sql`
+
+## Configuração do Frontend
+
+A aplicação Angular usa proxy para encaminhar as chamadas para o backend local.
+
+Arquivo:
+
+- `angular-ai/proxy.conf.js`
+
+Exemplo:
 
 ```javascript
-// Proxy para redirecionar chamadas da API
 module.exports = {
   "/api": {
     target: "http://localhost:8080",
@@ -170,83 +277,232 @@ module.exports = {
 };
 ```
 
-## 📂 Estrutura do Projeto
+Isso permite que o frontend chame URLs como `/api/chat-memory` sem precisar configurar CORS manualmente no Angular.
 
-```
-AI-Chat-With-Spring-AI-And-Angular/
-│
-├── angular-ai/                         # Frontend Angular
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── app.ts                  # Root component
-│   │   │   ├── app.routes.ts           # Rotas da aplicação
-│   │   │   ├── chat/
-│   │   │   │   ├── chat-service.ts     # Serviço de comunicação com API
-│   │   │   │   ├── chat-response.ts    # Modelo de resposta
-│   │   │   │   └── simple-chat/        # Componente de chat
-│   │   │   │       ├── simple-chat.ts
-│   │   │   │       ├── simple-chat.html
-│   │   │   │       └── simple-chat.scss
-│   │   ├── index.html
-│   │   └── main.ts
-│   ├── package.json
-│   ├── angular.json
-│   ├── tsconfig.json
-│   └── proxy.conf.js                   # Configuração de proxy
-│
-├── api-ai/                             # Backend Spring Boot
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── com/juliocesarcs2004/api_ai/
-│   │   │   │       ├── ApiAiApplication.java      # Classe principal
-│   │   │   │       └── chat/
-│   │   │   │           ├── ChatController.java    # REST Controller
-│   │   │   │           └── ChatMessage.java       # Modelo de dados
-│   │   │   └── resources/
-│   │   │       └── application.properties         # Configurações
-│   │   └── test/
-│   │       └── java/.../ApiAiApplicationTests.java
-│   ├── pom.xml                         # Configuração Maven
-│   ├── mvnw / mvnw.cmd                 # Maven Wrapper
-│   └── target/                         # Arquivos compilados
-│
-└── README.md                           # Este arquivo
+## Como Executar o Projeto
+
+### 1. Clonar o repositório
+
+```bash
+git clone <url-do-repositorio>
+cd AI-Chat-With-Spring-AI-And-Angular
 ```
 
-## ▶️ Como Executar
+### 2. Subir o banco PostgreSQL
 
-### Executar Backend (Spring Boot)
-
-#### Terminal 1 - Backend
+A forma mais simples é usar o Docker Compose dentro do diretório do backend:
 
 ```bash
 cd api-ai
+docker compose up -d
+```
 
-# Windows
-mvnw spring-boot:run
+Isso inicia o container do PostgreSQL na porta `5432`.
 
-# macOS/Linux
+### 3. Executar o backend
+
+```bash
+cd api-ai
+export OPENAI_API_KEY=sua_chave_da_openai
 ./mvnw spring-boot:run
 ```
 
-A API estará disponível em: `http://localhost:8080`
+O backend fica disponível em:
 
-### Executar Frontend (Angular)
+- http://localhost:8080
 
-#### Terminal 2 - Frontend
+### 4. Executar o frontend
+
+Em outro terminal:
 
 ```bash
 cd angular-ai
-
-# Desenvolvimento
+npm install
 npm start
-
-# Ou usando Angular CLI diretamente
-ng serve
 ```
 
-A aplicação estará disponível em: `http://localhost:4200`
+O frontend fica disponível em:
+
+- http://localhost:4200
+
+## Endpoints da API
+
+### Chat simples
+
+#### POST /api/chat
+
+Request body:
+
+```json
+{
+  "message": "Explique o que é inteligência artificial"
+}
+```
+
+Resposta:
+
+```json
+{
+  "message": "A inteligência artificial..."
+}
+```
+
+### Chat com memória
+
+#### POST /api/chat-memory/start
+
+Cria um novo chat para o usuário padrão `julio` e retorna o identificador, a descrição e a primeira resposta.
+
+Request body:
+
+```json
+{
+  "content": "Quero saber como funciona o Java"
+}
+```
+
+Resposta esperada:
+
+```json
+{
+  "chatId": "...",
+  "description": "Como funciona o Java",
+  "response": "..."
+}
+```
+
+#### POST /api/chat-memory/{chatId}
+
+Envia outra mensagem para um chat já existente.
+
+Request body:
+
+```json
+{
+  "content": "Me explique sobre collections em Java"
+}
+```
+
+#### GET /api/chat-memory
+
+Retorna todos os chats do usuário atual.
+
+#### GET /api/chat-memory/{chatId}
+
+Retorna as mensagens de um chat específico.
+
+## Fluxo de Uso no Frontend
+
+O Angular usa o serviço `ChatService` para conversar com a API:
+
+- `angular-ai/src/app/chat/chat-service.ts`
+
+A UI principal está em:
+
+- `angular-ai/src/app/chat/simple-chat/simple-chat.ts`
+- `angular-ai/src/app/chat/simple-chat/simple-chat.html`
+
+O componente permite:
+
+- digitar uma mensagem;
+- exibir o histórico em formato de conversa;
+- trocar entre resposta simulada e resposta real;
+- rolar automaticamente para a última mensagem.
+
+O projeto também possui um flag `local` para acionar uma resposta simulada em vez de chamar a API real.
+
+## Observações Importantes
+
+### Usuário fixo da memória
+
+A aplicação usa um usuário fixo:
+
+```java
+private static final String USER_ID = "julio";
+```
+
+Isso significa que, no estado atual, todos os chats são associados a esse mesmo usuário. Se quiser criar um sistema multiusuário, esse ponto deve ser evoluído para receber o identificador do usuário por login ou token.
+
+### Modelo da OpenAI
+
+A aplicação usa o cliente OpenAI do Spring AI e a configuração do modelo pode ser ajustada conforme a sua conta e os custos desejados. O projeto usa somente a configuração do `api-key` e não fixa um modelo específico no código, deixando isso em aberto para a configuração do ambiente e da própria biblioteca.
+
+### Uso do PostgreSQL
+
+O projeto foi configurado para PostgreSQL, mas o arquivo `schema-mysql.sql` também existe no repositório, indicando que a aplicação pode ser adaptada para MySQL em outra configuração.
+
+## Possíveis Melhorias
+
+Algumas melhorias que podem ser aplicadas futuramente:
+
+- autenticação e autorização;
+- chat por usuário real em vez de usuário fixo;
+- paginação de histórico de chats;
+- exportação de conversas;
+- suporte a múltiplos provedores de IA;
+- carregamento de histórico no frontend por chat selecionado;
+- interface com sidebar para listar conversas anteriores;
+- testes automatizados de backend e frontend;
+- configuração de ambiente por `.env`.
+
+## Troubleshooting
+
+### Erro de API key
+
+Se a aplicação falhar ao iniciar ou ao realizar a chamada para a IA, verifique se `OPENAI_API_KEY` foi configurada corretamente.
+
+```bash
+echo $OPENAI_API_KEY
+```
+
+### Erro de conexão com PostgreSQL
+
+Verifique se o container do banco está ativo:
+
+```bash
+docker compose ps
+```
+
+Se necessário:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+### Erro ao rodar o frontend
+
+Verifique se o Node.js e os pacotes foram instalados corretamente:
+
+```bash
+node --version
+npm install
+```
+
+### Erro ao rodar o backend
+
+Para verificar o build do Spring Boot:
+
+```bash
+cd api-ai
+./mvnw clean install
+```
+
+## Conclusão
+
+Este projeto funciona como exemplo prático de integração entre Angular e Spring AI, com foco em chat inteligente, memória de conversa e estrutura full-stack moderna. Ele é útil tanto para aprendizado quanto como base para aplicações mais robustas de chatbot e assistente inteligente.
+
+Se você deseja evoluir a solução, os pontos mais promissores são:
+
+- autenticação;
+- gestão de usuários;
+- persistência mais rica de contexto;
+- UI para histórico de chats;
+- testabilidade e monitoramento.
+
+---
+
+Desenvolvido como exemplo de integração entre Spring AI, Spring Boot e Angular.
 
 ### Verificar Status
 
